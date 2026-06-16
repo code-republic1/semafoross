@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Semáforo Aleatorio de Aduana</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0c0817;
+            --primary: hsl(265, 80%, 60%);
+            --primary-glow: rgba(138, 43, 226, 0.4);
+            --success: hsl(145, 85%, 45%);
+            --success-glow: rgba(46, 204, 113, 0.4);
+            --danger: hsl(355, 85%, 55%);
+            --danger-glow: rgba(231, 76, 60, 0.4);
+            --warning: hsl(45, 95%, 50%);
+            --text-light: #f1ecfa;
+            --text-muted: #8d7da8;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at 80% 20%, #22143d 0%, var(--bg-color) 70%);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        header {
+            padding: 24px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(12, 8, 23, 0.5);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        .logo-section h1 {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 30%, var(--text-muted) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+        }
+
+        .logo-section p {
+            font-size: 12px;
+            color: var(--success);
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .connection-panel {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        select, button {
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-light);
+            padding: 10px 16px;
+            cursor: pointer;
+        }
+
+        select option {
+            background: var(--bg-color);
+            color: var(--text-light);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary) 0%, #a052ff 100%);
+            border: none;
+            color: white;
+            padding: 10px 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(138, 43, 226, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #ff5252 100%);
+            box-shadow: 0 4px 15px var(--danger-glow);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--glass-border);
+            color: var(--text-light);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.05);
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--danger);
+            box-shadow: 0 0 10px var(--danger-glow);
+            transition: all 0.3s ease;
+        }
+
+        .status-connected .status-dot {
+            background-color: var(--success);
+            box-shadow: 0 0 10px var(--success-glow);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(46, 204, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+        }
+
+        main {
+            flex: 1;
+            padding: 40px 5%;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 32px;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .dashboard-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px var(--glass-shadow);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 30px;
+            transition: border-color 0.3s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+        }
+
+        .stat-total::before { background: var(--primary); }
+        .stat-verde::before { background: var(--success); }
+        .stat-rojo::before { background: var(--danger); }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 48px;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .stat-percentage {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .text-verde { color: var(--success); }
+        .text-rojo { color: var(--danger); }
+
+        /* Ratio Bar */
+        .ratio-section {
+            margin-top: 30px;
+        }
+
+        .ratio-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .ratio-bar-container {
+            width: 100%;
+            height: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .ratio-bar-verde {
+            height: 100%;
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+            width: 50%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .ratio-bar-rojo {
+            height: 100%;
+            background: linear-gradient(90deg, #e74c3c, #c0392b);
+            width: 50%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Control Card */
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .probability-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin: 20px 0;
+        }
+
+        .probability-display {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--warning);
+            min-width: 90px;
+            text-align: right;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--warning);
+            box-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+            transition: transform 0.1s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* Side Panel */
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .system-info {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 14px;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .info-val {
+            font-weight: 600;
+        }
+
+        /* Console */
+        .console-container {
+            display: flex;
+            flex-direction: column;
+            height: 300px;
+        }
+
+        .console-log {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            padding: 16px;
+            overflow-y: auto;
+            color: #bfa6ff;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .console-input-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .console-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-light);
+            padding: 12px 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+        }
+
+        .console-input:focus {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+            outline: none;
+        }
+
+        /* Flash Screen effect */
+        .flash-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease-out;
+        }
+
+        .flash-rojo {
+            background: radial-gradient(circle, rgba(231, 76, 60, 0.4) 0%, rgba(231, 76, 60, 0) 70%);
+        }
+
+        .flash-verde {
+            background: radial-gradient(circle, rgba(46, 204, 113, 0.4) 0%, rgba(46, 204, 113, 0) 70%);
+        }
+
+        .animate-flash {
+            animation: flashAnim 1.5s ease-out forwards;
+        }
+
+        @keyframes flashAnim {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            header {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="flashOverlay" class="flash-overlay"></div>
+
+    <header>
+        <div class="logo-section">
+            <h1>Semaforización Inteligente</h1>
+            <p>Control de Inspección Aleatoria</p>
+        </div>
+        <div class="connection-panel" id="connPanel">
+            <select id="baudRate">
+                <option value="9600">9600 Baudios (HC-06 BT)</option>
+                <option value="115200">115200 Baudios (Cable USB)</option>
+            </select>
+            <button class="btn" id="btnConnect" onclick="actionConnect()">Conectar Puerto</button>
+            <div class="status-dot"></div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Columna Izquierda: Estadísticas y Controles -->
+        <div class="dashboard-cards">
+            <!-- Tarjetas de Estadísticas -->
+            <div class="glass-card">
+                <div class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    Estadísticas del Sistema
+                </div>
+                
+                <div class="stats-grid">
+                    <!-- Total Personas -->
+                    <div class="stat-card stat-total">
+                        <div class="stat-label">Total Personas</div>
+                        <div class="stat-value" id="valPersonas">0</div>
+                        <div class="stat-percentage" style="color: var(--text-muted)">Pasos por barrera</div>
+                    </div>
+                    <!-- Luces Verdes -->
+                    <div class="stat-card stat-verde">
+                        <div class="stat-label">Libre Paso (Verde)</div>
+                        <div class="stat-value text-verde" id="valVerdes">0</div>
+                        <div class="stat-percentage text-verde" id="pctVerdes">0%</div>
+                    </div>
+                    <!-- Luces Rojas -->
+                    <div class="stat-card stat-rojo">
+                        <div class="stat-label">Inspección (Rojo)</div>
+                        <div class="stat-value text-rojo" id="valRojas">0</div>
+                        <div class="stat-percentage text-rojo" id="pctRojas">0%</div>
+                    </div>
+                </div>
+
+                <!-- Barra de Distribución -->
+                <div class="ratio-section">
+                    <div class="ratio-header">
+                        <span>Distribución Verde / Rojo</span>
+                        <span id="ratioLabel">50% / 50%</span>
+                    </div>
+                    <div class="ratio-bar-container">
+                        <div class="ratio-bar-verde" id="barVerde"></div>
+                        <div class="ratio-bar-rojo" id="barRojo"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ajuste de Probabilidad -->
+            <div class="glass-card">
+                <div class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    Ajuste de Probabilidad de Inspección
+                </div>
+                <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">
+                    Configura el porcentaje de probabilidad de que el semáforo arroje **ROJO (Inspección)** cuando un transeúnte cruce la barrera infrarroja.
+                </p>
+                <div class="probability-slider-container">
+                    <input type="range" id="probSlider" min="0" max="100" value="30" oninput="updateSliderText(this.value)" onchange="sendProbability(this.value)">
+                    <div class="probability-display" id="probText">30%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Derecha: Consola, Sincronización y Acciones -->
+        <div class="side-panel">
+            <!-- Información del Sistema -->
+            <div class="glass-card">
+                <div class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    Información y Reloj
+                </div>
+                
+                <div class="system-info">
+                    <div class="info-row">
+                        <span class="info-label">Fecha/Hora PC:</span>
+                        <span class="info-val" id="pcClock">--/--/---- --:--:--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Reloj Arduino:</span>
+                        <span class="info-val" id="arduinoClock" style="color: var(--warning)">No Sincronizado</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Dispositivo:</span>
+                        <span class="info-val">Arduino Nano v3</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 12px;">
+                    <button class="btn btn-secondary" onclick="syncTime()">Sincronizar Reloj</button>
+                </div>
+            </div>
+
+            <!-- Acciones Rápidas -->
+            <div class="glass-card">
+                <div class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    Acciones de Control
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); color: var(--text-light); box-shadow: none;" onclick="requestReport()">Solicitar Reporte</button>
+                    <button class="btn btn-danger" onclick="clearStats()">Borrar Estadísticas</button>
+                </div>
+            </div>
+
+            <!-- Terminal / Consola -->
+            <div class="glass-card console-container">
+                <div class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+                    Terminal de Diagnóstico
+                </div>
+                <div class="console-log" id="consoleLog">Esperando conexión...<br></div>
+                <div class="console-input-row">
+                    <input type="text" class="console-input" id="consoleInput" placeholder="Enviar comando manual..." onkeydown="if(event.key==='Enter') sendConsoleCommand()">
+                    <button class="btn" onclick="sendConsoleCommand()" style="padding: 10px 16px;">Enviar</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let port;
+        let reader;
+        let writer;
+        let readLoopPromise;
+        let isConnected = false;
+
+        // Inicia el reloj del PC local
+        setInterval(updateLocalClock, 1000);
+
+        function updateLocalClock() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hour = String(now.getHours()).padStart(2, '0');
+            const minute = String(now.getMinutes()).padStart(2, '0');
+            const second = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('pcClock').innerText = `${day}/${month}/${year} ${hour}:${minute}:${second}`;
+        }
+
+        function writeToLog(text, type = 'info') {
+            const log = document.getElementById('consoleLog');
+            let color = '#bfa6ff';
+            if (type === 'rx') color = '#2ecc71';
+            if (type === 'tx') color = '#e67e22';
+            if (type === 'err') color = '#e74c3c';
+
+            log.innerHTML += `<span style="color: ${color}">[${new Date().toLocaleTimeString()}] ${text}</span><br>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Conectar al puerto serial
+        async function actionConnect() {
+            if (isConnected) {
+                disconnect();
+                return;
+            }
+
+            if (!("serial" in navigator)) {
+                alert("Tu navegador no soporta Web Serial API. Usa Google Chrome o Microsoft Edge.");
+                return;
+            }
+
+            const baudRateSelect = document.getElementById('baudRate');
+            const baud = parseInt(baudRateSelect.value);
+
+            try {
+                port = await navigator.serial.requestPort();
+                await port.open({ baudRate: baud });
+                
+                isConnected = true;
+                document.getElementById('connPanel').classList.add('status-connected');
+                document.getElementById('btnConnect').innerText = 'Desconectar';
+                document.getElementById('btnConnect').classList.add('btn-danger');
+                writeToLog('Conectado al puerto serial correctamente.', 'info');
+
+                // Inicia loop de lectura
+                readLoopPromise = readLoop();
+
+                // Sincroniza hora automáticamente y solicita un reporte de inicio
+                setTimeout(() => {
+                    syncTime();
+                    setTimeout(requestReport, 500);
+                }, 1500);
+
+            } catch (err) {
+                console.error(err);
+                writeToLog('Error al conectar: ' + err.message, 'err');
+            }
+        }
+
+        async function disconnect() {
+            if (!isConnected) return;
+            
+            try {
+                if (reader) {
+                    await reader.cancel();
+                    await readLoopPromise;
+                }
+                await port.close();
+            } catch (err) {
+                console.error(err);
+            }
+
+            isConnected = false;
+            document.getElementById('connPanel').classList.remove('status-connected');
+            document.getElementById('btnConnect').innerText = 'Conectar Puerto';
+            document.getElementById('btnConnect').classList.remove('btn-danger');
+            document.getElementById('arduinoClock').innerText = 'No Sincronizado';
+            document.getElementById('arduinoClock').style.color = 'var(--warning)';
+            writeToLog('Puerto desconectado.', 'info');
+        }
+
+        // Bucle de lectura de datos
+        async function readLoop() {
+            const decoder = new TextDecoderStream();
+            const inputClosed = port.readable.pipeTo(decoder.writable);
+            const inputStream = decoder.readable;
+            reader = inputStream.getReader();
+
+            let buffer = '';
+
+            try {
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) {
+                        break;
+                    }
+                    buffer += value;
+                    let lines = buffer.split('\n');
+                    buffer = lines.pop(); // Guarda la última línea incompleta
+                    
+                    for (let line of lines) {
+                        line = line.trim();
+                        if (line.length > 0) {
+                            handleIncomingLine(line);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                writeToLog('Error de lectura: ' + err.message, 'err');
+            } finally {
+                reader.releaseLock();
+            }
+        }
+
+        // Escribir datos hacia el Arduino
+        async function writeSerial(text) {
+            if (!isConnected) {
+                alert('Conéctate a un puerto serial primero.');
+                return;
+            }
+            try {
+                writeToLog('ENVIANDO: ' + text, 'tx');
+                const encoder = new TextEncoder();
+                const writer = port.writable.getWriter();
+                await writer.write(encoder.encode(text + '\n'));
+                writer.releaseLock();
+            } catch (err) {
+                console.error(err);
+                writeToLog('Error al enviar: ' + err.message, 'err');
+            }
+        }
+
+        // Manejar respuestas entrantes
+        function handleIncomingLine(line) {
+            writeToLog('RECIBIDO: ' + line, 'rx');
+
+            // Flashear la interfaz en caso de detección del semáforo
+            if (line.includes("RESULTADO: ROJO")) {
+                triggerScreenFlash('rojo');
+                requestReport(); // Actualiza estadísticas
+            } else if (line.includes("RESULTADO: VERDE")) {
+                triggerScreenFlash('verde');
+                requestReport();
+            }
+
+            // Procesar Reporte Formateado: REPORTE;[personas];[verdes];[rojas];[probabilidad];[FechaHora]
+            if (line.startsWith("REPORTE;")) {
+                const parts = line.split(';');
+                if (parts.length >= 6) {
+                    const personas = parseInt(parts[1]);
+                    const verdes = parseInt(parts[2]);
+                    const rojas = parseInt(parts[3]);
+                    const prob = parseInt(parts[4]);
+                    const timeStr = parts[5];
+
+                    // Actualizar contadores
+                    document.getElementById('valPersonas').innerText = personas;
+                    document.getElementById('valVerdes').innerText = verdes;
+                    document.getElementById('valRojas').innerText = rojas;
+
+                    // Calcular porcentajes
+                    const totalLuces = verdes + rojas;
+                    let pctVerde = 0;
+                    let pctRojo = 0;
+                    if (totalLuces > 0) {
+                        pctVerde = Math.round((verdes / totalLuces) * 100);
+                        pctRojo = Math.round((rojas / totalLuces) * 100);
+                    }
+                    document.getElementById('pctVerdes').innerText = `${pctVerde}%`;
+                    document.getElementById('pctRojas').innerText = `${pctRojo}%`;
+                    document.getElementById('ratioLabel').innerText = `${pctVerde}% / ${pctRojo}%`;
+                    
+                    // Actualizar barras visuales
+                    document.getElementById('barVerde').style.width = `${pctVerde}%`;
+                    document.getElementById('barRojo').style.width = `${pctRojo}%`;
+
+                    // Actualizar probabilidad slider y texto
+                    document.getElementById('probSlider').value = prob;
+                    document.getElementById('probText').innerText = `${prob}%`;
+
+                    // Actualizar reloj del Arduino en pantalla
+                    if (timeStr !== "NO_SYNC") {
+                        document.getElementById('arduinoClock').innerText = timeStr;
+                        document.getElementById('arduinoClock').style.color = 'var(--success)';
+                    } else {
+                        document.getElementById('arduinoClock').innerText = 'Requiere Sincronización';
+                        document.getElementById('arduinoClock').style.color = 'var(--warning)';
+                    }
+                }
+            }
+            else if (line === "OK_BORRADO") {
+                writeToLog('Historial de conteos borrado con éxito.', 'info');
+                requestReport();
+            }
+            else if (line.startsWith("OK_PROB;")) {
+                const p = line.split(';')[1];
+                writeToLog(`Probabilidad actualizada a ${p}% en EEPROM.`, 'info');
+            }
+            else if (line.startsWith("OK_SYNC;")) {
+                const t = line.split(';')[1];
+                document.getElementById('arduinoClock').innerText = t;
+                document.getElementById('arduinoClock').style.color = 'var(--success)';
+                writeToLog('Sincronización horaria confirmada por Arduino.', 'info');
+            }
+        }
+
+        // Efecto visual de Flash cuando pasa alguien
+        function triggerScreenFlash(color) {
+            const overlay = document.getElementById('flashOverlay');
+            overlay.className = `flash-overlay flash-${color}`;
+            overlay.classList.remove('animate-flash');
+            void overlay.offsetWidth; // Dispara reflujo para reiniciar animación
+            overlay.classList.add('animate-flash');
+        }
+
+        // Acciones y Comandos
+        function updateSliderText(val) {
+            document.getElementById('probText').innerText = val + '%';
+        }
+
+        function sendProbability(val) {
+            writeSerial(`PROB ${val}`);
+        }
+
+        function syncTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hour = String(now.getHours()).padStart(2, '0');
+            const minute = String(now.getMinutes()).padStart(2, '0');
+            const second = String(now.getSeconds()).padStart(2, '0');
+            
+            const cmd = `SYNC ${year}-${month}-${day} ${hour}:${minute}:${second}`;
+            writeSerial(cmd);
+        }
+
+        function requestReport() {
+            writeSerial('REPORTE');
+        }
+
+        function clearStats() {
+            if (confirm('¿Estás seguro de que deseas restablecer y borrar permanentemente todos los contadores del Arduino?')) {
+                writeSerial('BORRAR');
+            }
+        }
+
+        function sendConsoleCommand() {
+            const input = document.getElementById('consoleInput');
+            const cmd = input.value.trim();
+            if (cmd.length > 0) {
+                writeSerial(cmd);
+                input.value = '';
+            }
+        }
+    </script>
+</body>
+</html>
