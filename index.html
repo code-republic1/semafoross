@@ -742,10 +742,10 @@
             // Flashear la interfaz en caso de detección del semáforo
             if (line.includes("RESULTADO: ROJO")) {
                 triggerScreenFlash('rojo');
-                requestReport(); // Actualiza estadísticas
+                setTimeout(requestReport, 1500); // Espera a que termine la alarma sonora antes de solicitar reporte
             } else if (line.includes("RESULTADO: VERDE")) {
                 triggerScreenFlash('verde');
-                requestReport();
+                setTimeout(requestReport, 600);  // Espera a que termine el tono de confirmación
             }
 
             // Procesar Reporte Formateado: REPORTE;[personas];[verdes];[rojas];[probabilidad];[FechaHora]
